@@ -34,8 +34,24 @@ def dlEditDistance(word1, word2):
 
     return d[lenstr1-1,lenstr2-1]
 
+def edits1(word):
+    "All edits that are one edit away from `word`."
+    latin_letters    = 'abcdefghijklmnopqrstuvwxyz'
+    polish_letters = 'ęóąśłźżćń'
+    letters = latin_letters + polish_letters
+    splits     = [(word[:i], word[i:])    for i in range(len(word) + 1)]
+    deletes    = [L + R[1:]               for L, R in splits if R]
+    transposes = [L + R[1] + R[0] + R[2:] for L, R in splits if len(R)>1]
+    replaces   = [L + c + R[1:]           for L, R in splits if R for c in letters]
+    inserts    = [L + c + R               for L, R in splits for c in letters]
+    # the candidate list usually contains few duplicates so set is used in order
+    # to filter them out
+    return set(deletes + transposes + replaces + inserts)
+
+
 if __name__ == "__main__":
-    print(dlEditDistance("actress", "acress"))
-    print(dlEditDistance("złoto", "zloto"))
-    print(dlEditDistance("abc", ""))
-    print(dlEditDistance("zdrowy", "zdrowa"))
+    # print(dlEditDistance("actress", "acress"))
+    # print(dlEditDistance("złoto", "zloto"))
+    # print(dlEditDistance("abc", ""))
+    # print(dlEditDistance("zdrowy", "zdrowa"))
+    print(edits1('somthing'))
