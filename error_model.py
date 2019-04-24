@@ -48,10 +48,13 @@ def edits1(word):
     # to filter them out
     return set(deletes + transposes + replaces + inserts)
 
+def edits2(word):
+    "All edits that are two edits away from `word`."
+    return (e2 for e1 in edits1(word) for e2 in edits1(e1))
 
 if __name__ == "__main__":
     # print(dlEditDistance("actress", "acress"))
     # print(dlEditDistance("złoto", "zloto"))
     # print(dlEditDistance("abc", ""))
     # print(dlEditDistance("zdrowy", "zdrowa"))
-    print(edits1('somthing'))
+    # print(len(set(edits2("paweł"))))
