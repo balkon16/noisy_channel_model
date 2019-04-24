@@ -6,7 +6,7 @@ Generally we don't know what errors are made at what frequency. This can be
 estimated by using the Wikipedia revision data.
 """
 
-def dlEditDistance(word1, word2):
+def dlEditDistance(s1, s2):
     """
     Compute Damerau–Levenshtein distance given two strings.
     """
@@ -58,4 +58,5 @@ if __name__ == "__main__":
     # print(dlEditDistance("abc", ""))
     # print(dlEditDistance("zdrowy", "zdrowa"))
     # print(len(set(edits2("paweł"))))
-    print(dlEditDistance("Paweł", "Gaweł"))
+    # print(dlEditDistance("Paweł", "Paweł"))
+    print(edits1("Paweł"))
