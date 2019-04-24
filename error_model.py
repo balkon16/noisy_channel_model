@@ -58,3 +58,4 @@ if __name__ == "__main__":
     # print(dlEditDistance("abc", ""))
     # print(dlEditDistance("zdrowy", "zdrowa"))
     # print(len(set(edits2("paweł"))))
+    print(dlEditDistance("Paweł", "Gaweł"))
