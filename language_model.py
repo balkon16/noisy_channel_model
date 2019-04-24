@@ -2,6 +2,7 @@ import sys
 import os
 from collections import defaultdict
 import regex #third-party library
+import re
 import unittest
 
 
@@ -46,6 +47,10 @@ def create_one_gram_model(file):
             line = line.lstrip()
             count_part, character_part = line.split(" ")
 
+            if int(count_part) == 29:
+                print("Less frequent words!")
+                # consider only words that occured at least 30 times
+                break
             transformed_character_sequence = apply_word_treatment(character_part)
 
             if transformed_character_sequence!= "":
@@ -61,15 +66,9 @@ def apply_word_treatment(dirty_word):
     a word) the transformed word is returned; if not an empty string is returned.
     """
 
-    # punctuation_marks = '`!'
-
     # delete trailing new-line character ("\n")
     dirty_word = dirty_word.rstrip()
 
-    # if the word is enclosed with quoatation marks - delete quoatation marks
-    if (dirty_word == '"' and dirty_word[-1] == '"') or \
-    (dirty_word == "'" and dirty_word[-1] == "'"):
-        dirty_word = dirty_word[1:-1]
 
     # ignore those lines that contain more numbers than letters
     number_count = 0
@@ -85,25 +84,17 @@ def apply_word_treatment(dirty_word):
     if number_count > letter_count or letter_count == 0:
         return ""
 
-    # delete punctuation from the end of the word
-    # caution: there are some short forms e.g. np. (stands for na przykład) or
-    # itd. (stands for i tak dalej) that must preserve their comma at the end
-    # other punctuation marks than full stop can be handled with no caution
-    if dirty_word[-1] in "?!,;:)}]":
-        print("Słowo przed usunięciem znaku interpunkcyjnego: ", dirty_word)
-        dirty_word = dirty_word[:-1]
-        print("Słowo po usunięciu znaku interpunkcyjnego: ", dirty_word)
+    # at this stage a primitive version is proposed; the function looks for
+    # sequences of characters and given the resulting list is not empty the
+    # first sequence is returned;
+    # TODO: dopisać do regexa znaki diakrytyczne w wielkimi i małymi lterami
+    find_sequences_pattern = re.compile(r'\w+', flags=re.UNICODE)
+    found_char_sequences = re.findall(find_sequences_pattern, dirty_word)
 
-    return dirty_word
+    if found_char_sequences:
+        return found_char_sequences[0]
+    return ""
 
-    # clean_word = ""
-    # if "-" not in dirty_word:
-    #     # this word doesn't contain a hyphen so I look for letters only
-    #     clean_word = regex.sub(u'[^\p{Latin}]', u'', dirty_word)
-    # else:
-    #     pass
-    # print(clean_word)
-    # return clean_word
 
 def words_with_hypens_inside(word):
     pass
