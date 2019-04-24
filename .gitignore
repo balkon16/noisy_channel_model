@@ -1,0 +1,5 @@
+data/
+.ipynb_checkpoints/
+przykladowe_slowa.txt
+regex_tests.ipynb
+testy_dlugosc_slowa.py
