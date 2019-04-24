@@ -3,3 +3,5 @@ data/
 przykladowe_slowa.txt
 regex_tests.ipynb
 testy_dlugosc_slowa.py
+ignored/
+TODO.txt
