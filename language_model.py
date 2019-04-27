@@ -4,7 +4,7 @@ from collections import defaultdict
 import regex #third-party library
 import re
 import unittest
-
+import operator
 
 ########################
 # Mam plik 1gram, który zawiera różne słowa - zarówno poprawne jak i niepoprawne.
@@ -88,26 +88,46 @@ def apply_word_treatment(dirty_word):
     # sequences of characters and given the resulting list is not empty the
     # first sequence is returned;
 
+    # store the result of different RegExes
+    regex_outputs = dict()
+
     # find basic patterns that consist of letter sequences, e.g. słowo, Polska
     basic_pattern = re.compile(r'[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+', flags=re.UNICODE)
-    found_basic = re.findall(basic_pattern, dirty_word)
+    found_basic = "".join(re.findall(basic_pattern, dirty_word))
+    regex_outputs[found_basic] = len(found_basic)
 
-    # find patterns that looks like this: k.p.c., m.in.
+    # find patterns that look like this: k.p.c., m.in.
     with_dot_pattern = re.compile(r'([A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+(?:\.))', \
     flags=re.UNICODE)
-    found_with_dot = re.findall(with_dot_pattern, dirty_word)
+    found_with_dot = "".join(re.findall(with_dot_pattern, dirty_word))
+    regex_outputs[found_with_dot] = len(found_with_dot)
 
     # find patterns with a hyphen
-    with_hyphen_pattern = re.compile(r'[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+-[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+', flags=re.UNICODE)
-    found_with_hyphen = re.findall(with_hyphen_pattern, dirty_word)
+    with_hyphen_pattern = re.compile(r'[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+-[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+', \
+    flags=re.UNICODE)
+    found_with_hyphen = "".join(re.findall(with_hyphen_pattern, dirty_word))
+    regex_outputs[found_with_hyphen] = len(found_with_hyphen)
 
     # TODO: dodać decydowanie, który output z trzech powyższych regexów wybrać
-    if found_char_sequences:
-        if len(found_char_sequences) > 1:
-            print("Znaleziono więcej niż jedno słowo: ", dirty_word, \
-            " Zapisano jako ", found_char_sequences[0])
-        return found_char_sequences[0]
-    return ""
+
+    # the criterion upon which the resulting word will be based on is the length
+    # check the length of output for each regex and choose the one that produces
+    # the longest sequence
+
+    resulting_sequence = \
+    max(regex_outputs.items(), key=operator.itemgetter(1))[0]
+
+
+    # print("Następujące słowo ", dirty_word, " zostało zastąpione przez ", resulting_sequence)
+
+    # return the longer one
+    return max("", resulting_sequence)
+    # if found_char_sequences:
+    #     if len(found_char_sequences) > 1:
+    #         print("Znaleziono więcej niż jedno słowo: ", dirty_word, \
+    #         " Zapisano jako ", found_char_sequences[0])
+    #     return found_char_sequences[0]
+    # return ""
 
 
 def words_with_hypens_inside(word):
