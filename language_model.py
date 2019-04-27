@@ -88,63 +88,31 @@ def apply_word_treatment(dirty_word):
     # sequences of characters and given the resulting list is not empty the
     # first sequence is returned;
 
-    # store the result of different RegExes
-    regex_outputs = dict()
-
-    # find basic patterns that consist of letter sequences, e.g. słowo, Polska
-    basic_pattern = re.compile(r'[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+', flags=re.UNICODE)
-    found_basic = "".join(re.findall(basic_pattern, dirty_word))
-    regex_outputs[found_basic] = len(found_basic)
-
-    # find patterns that look like this: k.p.c., m.in.
-    with_dot_pattern = re.compile(r'([A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+(?:\.))', \
-    flags=re.UNICODE)
-    found_with_dot = "".join(re.findall(with_dot_pattern, dirty_word))
-    regex_outputs[found_with_dot] = len(found_with_dot)
-
-    # find patterns with a hyphen
-    with_hyphen_pattern = re.compile(r'[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+-[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+', \
-    flags=re.UNICODE)
-    found_with_hyphen = "".join(re.findall(with_hyphen_pattern, dirty_word))
-    regex_outputs[found_with_hyphen] = len(found_with_hyphen)
-
-    # TODO: dodać decydowanie, który output z trzech powyższych regexów wybrać
-
-    # the criterion upon which the resulting word will be based on is the length
-    # check the length of output for each regex and choose the one that produces
-    # the longest sequence
-
-    resulting_sequence = \
-    max(regex_outputs.items(), key=operator.itemgetter(1))[0]
-
-
-    # print("Następujące słowo ", dirty_word, " zostało zastąpione przez ", resulting_sequence)
-
-    # return the longer one
-    return max("", resulting_sequence)
-    # if found_char_sequences:
-    #     if len(found_char_sequences) > 1:
-    #         print("Znaleziono więcej niż jedno słowo: ", dirty_word, \
-    #         " Zapisano jako ", found_char_sequences[0])
-    #     return found_char_sequences[0]
-    # return ""
-
-
-def words_with_hypens_inside(word):
-    pass
-
-class TestStringMethods(unittest.TestCase):
-
-    def test_apply_word_treatment(self):
-        self.assertEqual(apply_word_treatment("czerwony"), "czerwony")
-        self.assertEqual(apply_word_treatment("żółty"), "żółty")
-        self.assertEqual(apply_word_treatment("żółty123złoty"), "żółtyzłoty")
-        # self.assertEqual(apply_word_treatment("biało-czarny"), "biało-czarny")
-        self.assertEqual(apply_word_treatment("123"), "")
-        # self.assertEqual(apply_word_treatment("..krach-krach"), "krach-krach")
-        self.assertEqual(apply_word_treatment("@abc"), "abc")
-
-
+    # define pattern that can identify
+    # a.b.c.
+    # a.b.c
+    # word.
+    # word
+    regex = r"-?((?:[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ](\.))*[A-Za-z0-9ęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+(?:-[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+)*)-?\.?"
+    subst = "\\1\2"
+    result = re.sub(regex, subst, dirty_word, 0)
+    result = result.replace("\x02", "")
+    if "." in dirty_word:
+        print("Dla ", dirty_word, " stworzono ", result)
+    return max("", result)
+    # try:
+    #     found_sequence = "".join(re.findall(with_dots_pattern, dirty_word)[0])
+    #     # waiting for the elegant solution
+    #     # TODO: wprowadzić funkcjonalność usuwania myślnika do regex
+    #     if "-" in dirty_word:
+    #         print("Dla ", dirty_word, " stworzono ", found_sequence)
+    #     if found_sequence[-1] == "-":
+    #         found_sequence = found_sequence[:-1]
+    #     return max("", found_sequence)
+    # except IndexError:
+    #     # there are some weird words that are comprised of such letters: î, á etc.
+    #     print(dirty_word)
+    #     return ""
 
 if __name__ == "__main__":
     create_one_gram_model(sys.argv[1])
