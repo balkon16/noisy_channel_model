@@ -87,11 +87,25 @@ def apply_word_treatment(dirty_word):
     # at this stage a primitive version is proposed; the function looks for
     # sequences of characters and given the resulting list is not empty the
     # first sequence is returned;
-    # TODO: dopisać do regexa znaki diakrytyczne w wielkimi i małymi lterami
-    find_sequences_pattern = re.compile(r'\w+', flags=re.UNICODE)
-    found_char_sequences = re.findall(find_sequences_pattern, dirty_word)
 
+    # find basic patterns that consist of letter sequences, e.g. słowo, Polska
+    basic_pattern = re.compile(r'[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+', flags=re.UNICODE)
+    found_basic = re.findall(basic_pattern, dirty_word)
+
+    # find patterns that looks like this: k.p.c., m.in.
+    with_dot_pattern = re.compile(r'([A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+(?:\.))', \
+    flags=re.UNICODE)
+    found_with_dot = re.findall(with_dot_pattern, dirty_word)
+
+    # find patterns with a hyphen
+    with_hyphen_pattern = re.compile(r'[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+-[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+', flags=re.UNICODE)
+    found_with_hyphen = re.findall(with_hyphen_pattern, dirty_word)
+
+    # TODO: dodać decydowanie, który output z trzech powyższych regexów wybrać
     if found_char_sequences:
+        if len(found_char_sequences) > 1:
+            print("Znaleziono więcej niż jedno słowo: ", dirty_word, \
+            " Zapisano jako ", found_char_sequences[0])
         return found_char_sequences[0]
     return ""
 
