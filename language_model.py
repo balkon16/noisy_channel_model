@@ -1,10 +1,8 @@
 import sys
 import os
 from collections import defaultdict
-import regex #third-party library
 import re
-import unittest
-import operator
+import string
 
 ########################
 # Mam plik 1gram, który zawiera różne słowa - zarówno poprawne jak i niepoprawne.
@@ -47,7 +45,7 @@ def create_one_gram_model(file):
             line = line.lstrip()
             count_part, character_part = line.split(" ")
 
-            if int(count_part) == 29:
+            if int(count_part) == 9:
                 print("Less frequent words!")
                 # consider only words that occured at least 30 times
                 break
@@ -84,35 +82,15 @@ def apply_word_treatment(dirty_word):
     if number_count > letter_count or letter_count == 0:
         return ""
 
-    # at this stage a primitive version is proposed; the function looks for
-    # sequences of characters and given the resulting list is not empty the
-    # first sequence is returned;
-
-    # define pattern that can identify
-    # a.b.c.
-    # a.b.c
-    # word.
-    # word
     regex = r"-?((?:[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ](\.))*[A-Za-z0-9ęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+(?:-[A-Za-zęóąśłżźćńĘÓĄŚŁŻŹĆŃ]+)*)-?\.?"
     subst = "\\1\2"
     result = re.sub(regex, subst, dirty_word, 0)
     result = result.replace("\x02", "")
-    if "." in dirty_word:
-        print("Dla ", dirty_word, " stworzono ", result)
+    # the string module does not contain leading lower quotation mark typical
+    # for Polish
+    custom_punctuation = string.punctuation + "„”"
+    result = result.strip(custom_punctuation)
     return max("", result)
-    # try:
-    #     found_sequence = "".join(re.findall(with_dots_pattern, dirty_word)[0])
-    #     # waiting for the elegant solution
-    #     # TODO: wprowadzić funkcjonalność usuwania myślnika do regex
-    #     if "-" in dirty_word:
-    #         print("Dla ", dirty_word, " stworzono ", found_sequence)
-    #     if found_sequence[-1] == "-":
-    #         found_sequence = found_sequence[:-1]
-    #     return max("", found_sequence)
-    # except IndexError:
-    #     # there are some weird words that are comprised of such letters: î, á etc.
-    #     print(dirty_word)
-    #     return ""
 
 if __name__ == "__main__":
     create_one_gram_model(sys.argv[1])
