@@ -3,6 +3,7 @@ import os
 from collections import defaultdict
 import re
 import string
+import pickle
 
 def create_one_gram_model(file):
     """
@@ -46,7 +47,7 @@ def create_one_gram_model(file):
 
             if int(count_part) == 9:
                 print("Less frequent words!")
-                # consider only words that occured at least 30 times
+                # consider only words that occured at least 9 times
                 break
             transformed_character_sequence = apply_word_treatment(character_part)
 
@@ -101,6 +102,78 @@ def apply_word_treatment(dirty_word):
     result = result.strip(custom_punctuation)
     return max("", result)
 
+def create_two_gram_model(file):
+    """
+    Given a file containing pairs of words and their frequencies create a
+    dictionary where the key is the word and the value is its normalised
+    (probability) frequency.
+
+    The side effect of the function is a file that contains cleaned bigrams and
+    their (absolute) frequencies.
+
+    Each of the words from the pair will be treated as if it was a 1-gram.
+    After applying the treatment (cleaning regex) words will be concatened with
+    a space. It may happen that some (dirty) bigrams will be deleted since one
+    or both words may be reduced to an empty string.
+    """
+
+    # the target file wiil be saved in the same directory as the input file
+    target_file = os.path.join(os.path.dirname(file), "output_2gram.txt")
+
+    # The dictionary is parametrised with integer so that it can handle updating
+    # a value under a key that does not yet exists. Instead of surrounding the
+    # update logic with try/except I use defaultdict which handles try/except
+    # under the hood
+    two_gram_model_dict = defaultdict(int)
+
+    with open(file, 'r') as bi_gram_file, open(target_file, 'w') as target:
+        for line in bi_gram_file:
+
+            # variable used to handle situations in which at least one part
+            # of the character part of the line ends up as an empty string
+            is_valid_bigram = True
+
+            clean_bigram = []
+
+            # delete leading whitespaces
+            line = line.lstrip()
+
+            count_part, *character_part = line.split(" ")
+
+            if int(count_part) <= 10:
+                print("Less frequent words!")
+                break
+
+            for word in character_part:
+                clean_word = apply_word_treatment(word)
+                # if at least one word of the bigram ends up as an empty string
+                # then the resulting concatenation of words cannot be
+                # considered a bigram
+                if clean_word == "":
+                    is_valid_bigram = False
+                    break
+                clean_bigram.append(clean_word)
+
+            if is_valid_bigram:
+                clean_bigram_str = " ".join(clean_bigram)
+                target.write(" ".join([count_part, clean_bigram_str]) + \
+                            '\n')
+
+                two_gram_model_dict[clean_bigram_str] = int(count_part)
+
+    total_count = sum(two_gram_model_dict.values())
+    for bigram, abs_count in two_gram_model_dict.items():
+        two_gram_model_dict[bigram] = float(two_gram_model_dict[bigram])
+        two_gram_model_dict[bigram] /= total_count
+
+    return two_gram_model_dict
+
 if __name__ == "__main__":
-    dictionary = create_one_gram_model(sys.argv[1])
-    print(dictionary)
+    unigram_model = create_one_gram_model(str(sys.argv[1]))
+    bigram_model = create_two_gram_model(str(sys.argv[2]))
+    with open('./pickles/one_gram_model.p', 'wb') as one_gram_pickle:
+        pickle.dump(unigram_model, one_gram_pickle, \
+                    protocol=pickle.HIGHEST_PROTOCOL)
+    with open('./pickles/two_gram_model.p', 'wb') as two_gram_pickle:
+        pickle.dump(bigram_model, two_gram_pickle, \
+                    protocol=pickle.HIGHEST_PROTOCOL)
