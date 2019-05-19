@@ -15,7 +15,10 @@ import string
 def create_one_gram_model(file):
     """
     given a file containing words and their counts the function creates
-    the dict of those words as keys and their count as values
+    a new file with these words stripped from unnecessary characters.
+
+    The side effect of the function is a file that contains cleaned words and
+    their frequencies.
     """
 
     # it must be noted that the input files containg weird looking strings, e.g.
@@ -35,7 +38,11 @@ def create_one_gram_model(file):
     # the target file wiil be saved in the same directory as the input file
     target_file = os.path.join(os.path.dirname(file), "output_1gram.txt")
 
-    # one_gram_model_dict = defaultdict(int)
+    # The dictionary is parametrised with integer so that it can handle updating
+    # a value under a key that does not yet exists. Instead of surrounding the
+    # update logic with try/except I use defaultdict which handles try/except
+    # under the hood
+    one_gram_model_dict = defaultdict(int)
 
     count = 0
 
@@ -51,10 +58,20 @@ def create_one_gram_model(file):
                 break
             transformed_character_sequence = apply_word_treatment(character_part)
 
-            if transformed_character_sequence!= "":
+            if transformed_character_sequence != "":
                 # if the word treatment decided that it is the valid word
-                target.write(" ".join([count_part, transformed_character_sequence, "\n"]))
+                target.write(" ".join([count_part, \
+                                       transformed_character_sequence, "\n"]))
+                one_gram_model_dict[transformed_character_sequence] \
+                                                            += int(count_part)
 
+    # absolute counts must be transformed into probabilies <0, 1>
+    total_count = sum(one_gram_model_dict.values())
+    for word, abs_count in one_gram_model_dict.items():
+        one_gram_model_dict[word] = float(one_gram_model_dict[word])
+        one_gram_model_dict[word] /= total_count
+
+    return one_gram_model_dict
 
 def apply_word_treatment(dirty_word):
     """
@@ -93,5 +110,7 @@ def apply_word_treatment(dirty_word):
     return max("", result)
 
 if __name__ == "__main__":
-    create_one_gram_model(sys.argv[1])
+    dictionary = create_one_gram_model(sys.argv[1])
+    print(dictionary)
+
     # unittest.main()
