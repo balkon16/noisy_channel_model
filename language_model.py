@@ -4,14 +4,6 @@ from collections import defaultdict
 import re
 import string
 
-########################
-# Mam plik 1gram, który zawiera różne słowa - zarówno poprawne jak i niepoprawne.
-# Moim zadaniem jest stworzenie nowego pliku .txt, który zawiera jedynie poprawne
-# słowa. Na pewno zdarzy się, że to samo słowo wystąpi co najmniej dwa razy.
-# Następnie z pliku z pliku z poprawnymi słowami tworzony jest słownik, gdzie
-# kluczem jest poprawne słowo, a wartością częstość jego występowania.
-########################
-
 def create_one_gram_model(file):
     """
     given a file containing words and their counts the function creates
@@ -112,5 +104,3 @@ def apply_word_treatment(dirty_word):
 if __name__ == "__main__":
     dictionary = create_one_gram_model(sys.argv[1])
     print(dictionary)
-
-    # unittest.main()
